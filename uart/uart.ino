@@ -21,14 +21,42 @@ void loop() {
 
   //  mySerial.write("sugi pula, bolaj\n");
 
-  if (mySerial.available()) {
-    
-    Serial.write(mySerial.read());
+  while (mySerial.available()) {
+    char inChar = (char)mySerial.read();
+    if (inChar != '\n')
+      inputString += inChar;
+    if (inChar == '\n') {
+      Serial.println(inputString);
+      int no = format_string(); 
+      int y = no & 0x00FF;
+      int x = no >> 8;
+      
+      Serial.print("x = "); Serial.println(x);
+      Serial.print("y = "); Serial.println(y);
+      
+      Serial.println(no);
+      inputString = "";
+    }
   }
 
-  if (Serial.available()) {
-    mySerial.write(Serial.read());
+}
+
+int format_string() {
+
+  char chars[20];
+  int i = 0;
+  int j = 0;
+  while (inputString.charAt(i) < '0' || inputString.charAt(i) > '9') {
+    i++;
   }
+
+  for (int k = i; k < inputString.length(); k++) {
+    chars[j++] = inputString.charAt(k);
+  }
+  chars[j] = '\0';
+
+  Serial.println(chars);
+  return atoi(chars);
 }
 
 void ceva() {
