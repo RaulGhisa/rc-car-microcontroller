@@ -1,3 +1,6 @@
+#include "drive.h"
+#include "Arduino.h"
+
 #define MOTOR_B_ENABLE 6
 #define MOTOR_B_BWD 7
 #define MOTOR_B_FWD 8
@@ -6,6 +9,7 @@
 #define SERVO_A_ENABLE 11
 #define SERVO_POT 0
 
+using namespace std;
 String inputString = "";
 char drive_string[10] = {'\0'};
 int drive_string_pos = 0;
@@ -16,7 +20,7 @@ boolean should_init = true;
 // servo
 
 int ref;
-float P_CONSTANT = .48;
+float P_CONSTANT = .55;
 int it = 400;
 int schreechingThreshold = 12;
 
@@ -45,7 +49,7 @@ void drive(int y);
 void power(int pwm);
 void steerAtRef(int x);
 
-void setup() {
+void setupDrive() {
 
   digitalWrite(MOTOR_B_FWD, LOW);
   digitalWrite(MOTOR_B_BWD, LOW);
@@ -70,29 +74,27 @@ void setup() {
   dir = FWD;
 
   // UART
-
-  Serial.begin(19200);
   inputString.reserve(200);
 }
 
-void loop() {
-
-  while (Serial.available()) {
-    char inChar = (char)Serial.read();
-
-    if (inChar != '\n') {
-      inputString += inChar;
-    }
-    else {
-      int no = format_string();
-      int y = no & 0x00FF;
-      int x = no >> 8;
-
-      inputString = "";
-    }
-  }
-  drive(x, y);
-}
+//void loop() {
+//
+//  while (Serial.available()) {
+//    char inChar = (char)Serial.read();
+//
+//    if (inChar != '\n') {
+//      inputString += inChar;
+//    }
+//    else {
+//      int no = format_string();
+//      int y = no & 0x00FF;
+//      int x = no >> 8;
+//
+//      inputString = "";
+//    }
+//  }
+//  drive(x, y);
+//}
 
 int format_string() {
 
@@ -113,7 +115,7 @@ int format_string() {
 
 void drive(int x, int y) {
 
-    if (y > 51) {
+    if (y >= 51) {
       y = y - 51;
       dir = FWD;
     }
@@ -122,6 +124,7 @@ void drive(int x, int y) {
     }
 
     int pwm = map(y, 0, 50, 0, 255);
+    Serial.println(pwm);
     power(pwm);
     steering(x);
 }
@@ -139,14 +142,6 @@ void power(int pwm) {
       break;
   }
   analogWrite(motor.enable, pwm); 
-}
-
-void steering(int x) {
-  if (x < 51) {
-    steerAtRef(map(x, 0, 50, 480, 670));
-  } else {
-    steerAtRef(map(x, 51, 101, 480, 380));
-  }
 }
 
 int computeServoInput(int potInput, int ref) {
@@ -167,7 +162,15 @@ void steerAtRef (int ref) {
   int potInput = analogRead(SERVO_POT);
   int command = computeServoInput(potInput, ref);
 
-  digitalWrite(serv.fwd, command > 0);
-  digitalWrite(serv.bwd, command < 0);
+  digitalWrite(serv.fwd, command < 0);
+  digitalWrite(serv.bwd, command > 0);
   analogWrite(serv.enable, abs(command));
+}
+
+void steering(int x) {
+  if (x < 51) {
+    steerAtRef(map(x, 0, 50, 500, 670));
+  } else {
+    steerAtRef(map(x, 51, 101, 500, 400));
+  }
 }

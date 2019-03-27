@@ -1,6 +1,6 @@
-int forward = 5;
-int backward = 4;
-int enable = 6;
+  int forward = 9;
+int backward = 10;
+int enable = 11;
 int pot = 0;
 int ref;
 float P_CONSTANT = .48;
@@ -8,7 +8,8 @@ int it = 400;
 int schreechingThreshold = 12;
  
 int computeServoInput(int potInput, int ref) {
-  Serial.println(potInput - ref);
+  //Serial.println(potInput - ref);
+  Serial.println(potInput);
   int result = (int)(P_CONSTANT * (potInput - ref));
   if (result > 255){
     return 255;
@@ -43,20 +44,20 @@ void setup() {
 }
  
 void loop() {
-  steerAtRef(ref);
-  it++;
-  Serial.println(ref);
-  delay(50);
-  if (it % 400 < 100){
-    ref = 600;
-  }
-  else if(it%400 < 200){
-    ref = 500;
-  }
-  else if(it%400 < 300){
-    ref = 400;
-  }
-  else{
-    ref = 500;
-  }
+//  steerAtRef(ref);
+//  it++;
+//  //Serial.println(ref);
+//  delay(50);
+//  if (it % 400 < 100){
+//    ref = 600;
+//  }
+//  else if(it%400 < 200){
+//    ref = 500;
+//  }
+//  else if(it%400 < 300){
+//    ref = 370;
+//  }
+//  else{
+//    ref = 500;
+//  }
 }
