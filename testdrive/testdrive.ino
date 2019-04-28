@@ -1,6 +1,3 @@
-#include "drive.h"
-#include "Arduino.h"
-
 #define MOTOR_B_ENABLE 6
 #define MOTOR_B_BWD 7
 #define MOTOR_B_FWD 8
@@ -9,14 +6,18 @@
 #define SERVO_A_ENABLE 11
 #define SERVO_POT 0
 
-//String inputString = "";
-//char drive_string[10] = {'\0'};
-//int drive_string_pos = 0;
-//boolean stringComplete = false;
+String inputString = "";
+char drive_string[10] = {'\0'};
+int drive_string_pos = 0;
+boolean stringComplete = false;
 
 boolean should_init = true;
 
+
+
 // servo
+
+// led
 
 int ref;
 float P_CONSTANT = .55;
@@ -43,12 +44,15 @@ struct HBridge serv = {SERVO_A_FWD, SERVO_A_BWD, SERVO_A_ENABLE};
 
 int counter = 0;
 
-int format_string();
-void power(int pwm);
-void steerAtRef(int x);
-void drive(int x, int y);
+//int format_string();
+//void power(int pwm);
+//void steerAtRef(int x);
 
-void setupDrive() {
+int y = 0;
+int x = 0;
+
+
+void setup() {
 
   digitalWrite(MOTOR_B_FWD, LOW);
   digitalWrite(MOTOR_B_BWD, LOW);
@@ -70,62 +74,90 @@ void setupDrive() {
   digitalWrite(motor.fwd, 1);
   digitalWrite(motor.bwd, 0);
 
+  Serial.begin(19200);
+
+
   dir = FWD;
 
   // UART
-//  inputString.reserve(200);
+  inputString.reserve(200);
+
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
 }
 
-//void loop() {
-//
-//  while (Serial.available()) {
-//    char inChar = (char)Serial.read();
-//
-//    if (inChar != '\n') {
-//      inputString += inChar;
-//    }
-//    else {
-//      int no = format_string();
-//      int y = no & 0x00FF;
-//      int x = no >> 8;
-//
-//      inputString = "";
-//    }
-//  }
-//  drive(x, y);
-//}
-//
-//int format_string() {
-//
-//  char chars[20];
-//  int i = 0;
-//  int j = 0;
-//  while (inputString.charAt(i) < '0' || inputString.charAt(i) > '9') {
-//    i++;
-//  }
-//
-//  for (int k = i; k < inputString.length(); k++) {
-//    chars[j++] = inputString.charAt(k);
-//  }
-//  chars[j] = '\0';
-//
-//  return atoi(chars);
-//}
+void drive(int x, int y);
+
+void loop() {
+  //
+  //    while (Serial.available()) {
+  //      char inChar = (char)Serial.read();
+  //
+  //      if (inChar != '\n') {
+  //        inputString += inChar;
+  //      }
+  //      if (inChar == '\n') {
+  //        digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+  //        int no = format_string();
+  //        y = no & 0x00FF;
+  //        x = no >> 8;
+  //        inputString = "";
+  //      }
+  //    }
+  //    drive(x, y);
+
+  //  for (int i = 0; i < 100; i += 10) {
+  //    drive(i, 50);
+  //    delay(500);
+  //  }
+  //
+  power(255);
+  delay(3000);
+  power(0);
+  delay(1000);
+
+  dir = BWD;
+  power(255);
+  delay(3000);
+  power(0);
+  delay(1000);
+
+  steering(100);
+  delay(1000);
+  steering(0);
+  delay(1000);
+}
+
+int format_string() {
+
+  char chars[20];
+  int i = 0;
+  int j = 0;
+  while (inputString.charAt(i) < '0' || inputString.charAt(i) > '9') {
+    i++;
+  }
+
+  for (int k = i; k < inputString.length(); k++) {
+    chars[j++] = inputString.charAt(k);
+  }
+  chars[j] = '\0';
+
+  return atoi(chars);
+}
 
 void drive(int x, int y) {
 
-    if (y >= 51) {
-      y = y - 51;
-      dir = FWD;
-    }
-    else {
-      dir = BWD;
-    }
+  if (y >= 51) {
+    y = y - 51;
+    dir = FWD;
+  }
+  else {
+    dir = BWD;
+  }
 
-    int pwm = map(y, 0, 50, 0, 255);
-    Serial.println(pwm);
-    power(pwm);
-    steering(x);
+  int pwm = map(y, 0, 50, 0, 255);
+  power(pwm);
+  steering(x);
 }
 
 void power(int pwm) {
@@ -140,7 +172,8 @@ void power(int pwm) {
       digitalWrite(motor.bwd, 1);
       break;
   }
-  analogWrite(motor.enable, pwm); 
+  analogWrite(motor.enable, pwm);
+  Serial.print("pwm: "); Serial.println(pwm);
 }
 
 int computeServoInput(int potInput, int ref) {
