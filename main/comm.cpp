@@ -1,5 +1,8 @@
-#define RED 7
-#define BLUE 6
+#define RED 7 // competitor 1
+#define BLUE 6 // competitor 2
+#define WHITE 5 // charging LED
+
+#define BATTERY_THRESHOLD
 
 #include "comm.h"
 #include "Arduino.h"
@@ -7,6 +10,7 @@
 #include "TimerOne.h"
 
 String inputString = "";
+int batteryLedStatus = 0;
 
 typedef struct {
   int16_t distanceSensorData[VL_NO];
@@ -25,7 +29,12 @@ void sendStatus() {
   for (int i = 0; i < VL_NO; i++) {
     sensorData.sensors.distanceSensorData[i] = getMuxDistanceReading(i);
   }
+
   sensorData.sensors.batteryVoltage = getBatteryLevel();
+  if (sensorData.sensors.batteryVoltage > BATTERY_THRESHOLD) {
+	  digitalWrite(WHITE, batteryLedStatus ^ 1);
+  }
+
   sensorData.sensors.velocity = getVelocity();
 
   // send to Serial
