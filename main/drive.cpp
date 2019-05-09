@@ -48,8 +48,8 @@ int counter = 0;
 //void power(int pwm);
 //void steerAtRef(int x);
 
-int y = 0;
-int x = 0;
+//int y = 0;
+//int x = 0;
 
 void setupDrive() {
 
@@ -72,8 +72,6 @@ void setupDrive() {
 
   digitalWrite(MOTOR_B_FWD, 1);
   digitalWrite(MOTOR_B_BWD, 0);
-
-  Serial.begin(19200);
 
   dir = FWD;
 
@@ -130,8 +128,7 @@ void power(int pwm) {
       break;
   }
   analogWrite(motor.enable, pwm);
-  Serial.print("pwm: "); Serial.println(pwm);
-}
+  }
 
 int computeServoInput(int potInput, int ref) {
   int result = (int)(P_CONSTANT * (potInput - ref));
@@ -149,11 +146,7 @@ int computeServoInput(int potInput, int ref) {
 
 void steerAtRef (int ref) {
   int potInput = analogRead(SERVO_POT);
-  Serial.print("potInput: "); Serial.println(potInput);
   int command = computeServoInput(potInput, ref);
-  Serial.print("command / result: "); Serial.println(command);
-
-  // 
 
   digitalWrite(serv.fwd, command < 0);
   digitalWrite(serv.bwd, command > 0);

@@ -25,14 +25,6 @@ void setupSensors() {
   }
 }
 
-//void loop() {
-//  for (uint8_t t = 0; t < VL_NO; t++){
-//    Serial.println(t);
-//    Serial.println(getDistanceReading(t));
-//  }
-//  delay(100);
-//}
-
 int getMuxDistanceReading(int sensorIndex) {
     tcaselect(VL53[sensorIndex]);
     VL53L0X sensor;
