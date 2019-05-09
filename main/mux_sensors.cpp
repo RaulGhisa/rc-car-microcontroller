@@ -2,7 +2,7 @@
 #define ENCB 3
 #define NB_TEETH    12.0
 #define REDUCTION   4.0/9/34*17/39 //differential reduction, motor reduction and motor gear
-#define WHEEL_RAD   5.5/2
+#define WHEEL_RAD   55/2 //mm
 #define ANG2VEL     2.0*PI/NB_TEETH*REDUCTION*WHEEL_RAD
 
 #include "mux_sensors.h"
@@ -10,7 +10,7 @@
 #include <VL53L0X.h>
 
 uint8_t VL53[] = {2, 3, 4, 5};
-volatile int velocity = 0;
+volatile int16_t velocity = 0; // mm/s
 int counterEnc = micros();
 
 void tcaselect(int i) {
@@ -44,13 +44,13 @@ void setupSensors() {
 //  delay(100);
 //}
 
-void getVelocity(){
+int16_t getVelocity(){
   return velocity;
 }
 
 void encoderTrigger()
 {
-  velocity = (float)1000000*ANG2VEL/(micros()-counterEnc);
+  velocity = (int16_t)1000000*ANG2VEL/(micros()-counterEnc);
   if(digitalRead(ENCB)==LOW)
   {
     velocity = -velocity;
@@ -58,7 +58,7 @@ void encoderTrigger()
   counterEnc = micros();
 }
 
-int getMuxDistanceReading(int sensorIndex) {
+int16_t getMuxDistanceReading(int sensorIndex) {
     tcaselect(VL53[sensorIndex]);
     VL53L0X sensor;
     return sensor.readRangeContinuousMillimeters();

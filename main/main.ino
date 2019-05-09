@@ -1,12 +1,24 @@
 #include "mux_sensors.h"
 #include "drive.h"
 
-#define BATTERY_PIN 14
+#define CHARGING_PIN A1
+#define BATTERY_PIN A0
 
 String inputString = "";
 char drive_string[10] = { '\0' };
 int drive_string_pos = 0;
 boolean stringComplete = false;
+
+typedef struct {
+  int16_t distanceSensorData[VL_NO];
+  int16_t batteryVoltage;
+  int16_t velocity;
+} SensorData;
+
+typedef union {
+  SensorData sensors;
+  byte serializedSensor[sizeof(SensorData)];
+} SerializedSensorData;
 
 void setup() {
   setupSensors();
@@ -17,9 +29,6 @@ void setup() {
 
   pinMode(BATTERY_PIN, INPUT);
 }
-
-
-int sensorData[5] = {0};
 
 void loop() {
   // 1. Read commands from RPi (Serial)
@@ -51,26 +60,19 @@ void loop() {
 //  }
 
   // update steering and power
-//  drive(50, 50);
+  drive(50, 50);
 
 
-  // read sensor + battery
-//  for (int i = 0; i < VL_NO; i++) {
-//    sensorData[i] = getMuxDistanceReading(i);
-//  }
-//  float batteryVolt = map(analogRead(BATTERY_PIN), 0, 1023, 6, 8.84);
-//
-//  // send to Serial
-//  for (int i = 0; i < sizeof(sensorData); i++) {
-//    Serial.println(sensorData[0]);
-//  }
-//  Serial.println(batteryVolt);
-
-  for (int i = 5; i < 100; i += 10) {
-    for (int j = 0; j < 50; j++) {
-      steering(i);
-    }
+  // read sensors + battery
+  SerializedSensorData sensorData;
+  for (int i = 0; i < VL_NO; i++) {
+    sensorData.sensors.distanceSensorData[i] = getMuxDistanceReading(i);
   }
+  sensorData.sensors.batteryVoltage = map(analogRead(BATTERY_PIN), 0, 1023, 0, 100);
+  sensorData.sensors.velocity = getVelocity();
+
+  // send to Serial
+  Serial.write(sensorData.serializedSensor, sizeof(sensorData));
 }
 
 int format_string() {
