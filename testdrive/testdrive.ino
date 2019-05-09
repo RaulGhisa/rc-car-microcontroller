@@ -13,8 +13,6 @@ boolean stringComplete = false;
 
 boolean should_init = true;
 
-
-
 // servo
 
 // led
@@ -71,11 +69,10 @@ void setup() {
   pinMode(serv.enable, OUTPUT);
   pinMode(SERVO_POT, INPUT);
 
-  digitalWrite(motor.fwd, 1);
-  digitalWrite(motor.bwd, 0);
+  digitalWrite(MOTOR_B_FWD, 1);
+  digitalWrite(MOTOR_B_BWD, 0);
 
   Serial.begin(19200);
-
 
   dir = FWD;
 
@@ -89,43 +86,58 @@ void setup() {
 void drive(int x, int y);
 
 void loop() {
-  //
-  //    while (Serial.available()) {
-  //      char inChar = (char)Serial.read();
-  //
-  //      if (inChar != '\n') {
-  //        inputString += inChar;
-  //      }
-  //      if (inChar == '\n') {
-  //        digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-  //        int no = format_string();
-  //        y = no & 0x00FF;
-  //        x = no >> 8;
-  //        inputString = "";
-  //      }
-  //    }
-  //    drive(x, y);
+//  
+//      while (mySerial.available()) {
+//        char inChar = (char)mySerial.read();
+//  
+//        if (inChar != '\n') {
+//          inputString += inChar;
+////          Serial.println("received");
+////          mySerial.println("received");
+//
+//
+//        }
+//        if (inChar == '\n') {
+//          digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+//          Serial.println("received");
+//          mySerial.println("received");
+//          int no = format_string();
+//          y = no & 0x00FF;
+//          x = no >> 8;
+//          inputString = "";
+//        }
+//      }
+
+//      char str[] = {'c', 'e', 'v', 'a', '\n'};
+//      char *str = "ceva\n";
+//      Serial.print(str);
+//      delay(1000);
+//      Serial.print('\n');
+//      drive(x, y);
 
   //  for (int i = 0; i < 100; i += 10) {
   //    drive(i, 50);
   //    delay(500);
   //  }
   //
-  power(255);
-  delay(3000);
-  power(0);
-  delay(1000);
 
-  dir = BWD;
-  power(255);
-  delay(3000);
-  power(0);
-  delay(1000);
+//  dir = FWD;
+//  power(255);
+//  delay(3000);
+//  power(0);
+//  delay(1000);
+//  
+//  dir = BWD;
+//  power(255);
+//  delay(3000);
+//  power(0);
+//  delay(1000);
 
-  steering(100);
-  delay(1000);
-  steering(0);
-  delay(1000);
+  for (int i = 5; i < 100; i += 10) {
+    for (int j = 0; j < 50; j++) {
+      steering(i);
+    }
+  }
 }
 
 int format_string() {
@@ -192,7 +204,11 @@ int computeServoInput(int potInput, int ref) {
 
 void steerAtRef (int ref) {
   int potInput = analogRead(SERVO_POT);
+  Serial.print("potInput: "); Serial.println(potInput);
   int command = computeServoInput(potInput, ref);
+  Serial.print("command / result: "); Serial.println(command);
+
+  // 
 
   digitalWrite(serv.fwd, command < 0);
   digitalWrite(serv.bwd, command > 0);
@@ -201,8 +217,8 @@ void steerAtRef (int ref) {
 
 void steering(int x) {
   if (x < 51) {
-    steerAtRef(map(x, 0, 50, 500, 670));
+    steerAtRef(map(x, 0, 50, 500, 620)); // left
   } else {
-    steerAtRef(map(x, 51, 101, 500, 400));
+    steerAtRef(map(x, 51, 101, 500, 400)); // right
   }
 }

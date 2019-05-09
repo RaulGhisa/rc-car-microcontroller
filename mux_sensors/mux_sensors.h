@@ -1,5 +1,5 @@
 #define TCAADDR 0x70
-#define VL_NO 2
+#define VL_NO 4
 
 void tcaselect(int i);
 

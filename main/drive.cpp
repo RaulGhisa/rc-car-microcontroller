@@ -1,6 +1,5 @@
 #include "drive.h"
 #include "Arduino.h"
-
 #define MOTOR_B_ENABLE 6
 #define MOTOR_B_BWD 7
 #define MOTOR_B_FWD 8
@@ -8,15 +7,17 @@
 #define SERVO_A_FWD 10
 #define SERVO_A_ENABLE 11
 #define SERVO_POT 0
-
+//
 //String inputString = "";
 //char drive_string[10] = {'\0'};
 //int drive_string_pos = 0;
 //boolean stringComplete = false;
 
-boolean should_init = true;
+//boolean should_init = true;
 
 // servo
+
+// led
 
 int ref;
 float P_CONSTANT = .55;
@@ -43,10 +44,12 @@ struct HBridge serv = {SERVO_A_FWD, SERVO_A_BWD, SERVO_A_ENABLE};
 
 int counter = 0;
 
-int format_string();
-void power(int pwm);
-void steerAtRef(int x);
-void drive(int x, int y);
+//int format_string();
+//void power(int pwm);
+//void steerAtRef(int x);
+
+int y = 0;
+int x = 0;
 
 void setupDrive() {
 
@@ -67,33 +70,20 @@ void setupDrive() {
   pinMode(serv.enable, OUTPUT);
   pinMode(SERVO_POT, INPUT);
 
-  digitalWrite(motor.fwd, 1);
-  digitalWrite(motor.bwd, 0);
+  digitalWrite(MOTOR_B_FWD, 1);
+  digitalWrite(MOTOR_B_BWD, 0);
+
+  Serial.begin(19200);
 
   dir = FWD;
 
   // UART
 //  inputString.reserve(200);
+
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
 }
 
-//void loop() {
-//
-//  while (Serial.available()) {
-//    char inChar = (char)Serial.read();
-//
-//    if (inChar != '\n') {
-//      inputString += inChar;
-//    }
-//    else {
-//      int no = format_string();
-//      int y = no & 0x00FF;
-//      int x = no >> 8;
-//
-//      inputString = "";
-//    }
-//  }
-//  drive(x, y);
-//}
 //
 //int format_string() {
 //
@@ -114,18 +104,17 @@ void setupDrive() {
 
 void drive(int x, int y) {
 
-    if (y >= 51) {
-      y = y - 51;
-      dir = FWD;
-    }
-    else {
-      dir = BWD;
-    }
+  if (y >= 51) {
+    y = y - 51;
+    dir = FWD;
+  }
+  else {
+    dir = BWD;
+  }
 
-    int pwm = map(y, 0, 50, 0, 255);
-    Serial.println(pwm);
-    power(pwm);
-    steering(x);
+  int pwm = map(y, 0, 50, 0, 255);
+  power(pwm);
+  steering(x);
 }
 
 void power(int pwm) {
@@ -140,7 +129,8 @@ void power(int pwm) {
       digitalWrite(motor.bwd, 1);
       break;
   }
-  analogWrite(motor.enable, pwm); 
+  analogWrite(motor.enable, pwm);
+  Serial.print("pwm: "); Serial.println(pwm);
 }
 
 int computeServoInput(int potInput, int ref) {
@@ -159,7 +149,11 @@ int computeServoInput(int potInput, int ref) {
 
 void steerAtRef (int ref) {
   int potInput = analogRead(SERVO_POT);
+  Serial.print("potInput: "); Serial.println(potInput);
   int command = computeServoInput(potInput, ref);
+  Serial.print("command / result: "); Serial.println(command);
+
+  // 
 
   digitalWrite(serv.fwd, command < 0);
   digitalWrite(serv.bwd, command > 0);
@@ -168,8 +162,8 @@ void steerAtRef (int ref) {
 
 void steering(int x) {
   if (x < 51) {
-    steerAtRef(map(x, 0, 50, 500, 670));
+    steerAtRef(map(x, 0, 50, 500, 620)); // left
   } else {
-    steerAtRef(map(x, 51, 101, 500, 400));
+    steerAtRef(map(x, 51, 101, 500, 400)); // right
   }
 }

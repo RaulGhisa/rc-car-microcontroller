@@ -35,7 +35,7 @@ void loop() {
   // 6. delay(50);
 
   // read commands
-//  while (Serial.available()) {
+//  if (Serial.available()) {
 //    char inChar = (char)Serial.read();
 //
 //    if (inChar != '\n') {
@@ -51,7 +51,7 @@ void loop() {
 //  }
 
   // update steering and power
-  drive(50, 50);
+//  drive(50, 50);
 
 
   // read sensor + battery
@@ -66,7 +66,11 @@ void loop() {
 //  }
 //  Serial.println(batteryVolt);
 
-  delay(100);
+  for (int i = 5; i < 100; i += 10) {
+    for (int j = 0; j < 50; j++) {
+      steering(i);
+    }
+  }
 }
 
 int format_string() {
