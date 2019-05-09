@@ -1,8 +1,8 @@
-#define RED 7 // competitor 1
-#define BLUE 6 // competitor 2
+#define RED 13 // competitor 1
+#define BLUE 12 // competitor 2
 #define WHITE 5 // charging LED
 
-#define BATTERY_THRESHOLD
+#define CHARGING_PIN A2
 
 #include "comm.h"
 #include "Arduino.h"
@@ -11,7 +11,7 @@
 #include "drive.h"
 
 String inputString = "";
-int batteryLedStatus = 0;
+bool batteryLedStatus = 0;
 
 typedef struct {
   int16_t distanceSensorData[VL_NO];
@@ -34,19 +34,28 @@ void sendStatus() {
   }
 
   sensorData.sensors.batteryVoltage = getBatteryLevel();
-  if (sensorData.sensors.batteryVoltage > BATTERY_THRESHOLD) {
-	  digitalWrite(WHITE, batteryLedStatus ^ 1);
-  }
-
   sensorData.sensors.velocity = getVelocity();
   sensorData.sensors.motorPwm = getThrottlePwm();
   sensorData.sensors.servoPwm = getSteerPwm();
   // send to Serial
   Serial.write(sensorData.serializedSensor, sizeof(sensorData));
+
+  // blink charging LED
+  if (digitalRead(CHARGING_PIN) == HIGH) {
+    batteryLedStatus = ~batteryLedStatus;
+  }
+  else{
+    batteryLedStatus = 0;
+  }
+  digitalWrite(WHITE, batteryLedStatus);
 }
 
 void setupComm() {
   inputString.reserve(200);
+  pinMode(RED, OUTPUT);
+  pinMode(BLUE, OUTPUT);
+  pinMode(WHITE, OUTPUT);
+  pinMode(CHARGING_PIN, INPUT);
   Timer1.initialize(1000000);
   Timer1.attachInterrupt(sendStatus);
 

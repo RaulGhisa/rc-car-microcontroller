@@ -7,7 +7,7 @@
 #define SERVO_A_BWD 9
 #define SERVO_A_FWD 10
 #define SERVO_A_ENABLE 11
-#define SERVO_POT 0
+#define SERVO_POT A0
 
 int ref;
 float P_CONSTANT = .55;

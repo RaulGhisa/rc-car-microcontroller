@@ -5,7 +5,7 @@
 #define WHEEL_RAD   55/2 //mm
 #define ANG2VEL     2.0*PI/NB_TEETH*REDUCTION*WHEEL_RAD
 
-#define BATTERY_PIN A0
+#define BATTERY_PIN A1
 
 #include "mux_sensors.h"
 #include "Wire.h"
