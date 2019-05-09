@@ -8,6 +8,8 @@ void tcaselect(int i);
 
 void setupSensors();
 
+int16_t getBatteryLevel();
+
 int16_t getMuxDistanceReading(int sensorIndex); 
 
 int16_t getVelocity();

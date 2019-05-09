@@ -1,20 +1,62 @@
+#define RED 7
+#define BLUE 6
+
 #include "comm.h"
 #include "Arduino.h"
+#include "mux_sensors.h"
+#include "TimerOne.h"
 
 String inputString = "";
 
-void sendData(int *sensorData, int dataSize) {
-  for (int i = 0; i < dataSize; i++) Serial.print(sensorData[i]);
-  Serial.println();
+typedef struct {
+  int16_t distanceSensorData[VL_NO];
+  int16_t batteryVoltage;
+  int16_t velocity;
+} SensorData;
+
+typedef union {
+  SensorData sensors;
+  byte serializedSensor[sizeof(SensorData)];
+} SerializedSensorData;
+
+void sendStatus() {
+  // read sensors + battery
+  SerializedSensorData sensorData;
+  for (int i = 0; i < VL_NO; i++) {
+    sensorData.sensors.distanceSensorData[i] = getMuxDistanceReading(i);
+  }
+  sensorData.sensors.batteryVoltage = getBatteryLevel();
+  sensorData.sensors.velocity = getVelocity();
+
+  // send to Serial
+  Serial.write(sensorData.serializedSensor, sizeof(sensorData));
 }
 
 void setupComm() {
   inputString.reserve(200);
+  Timer1.initialize(1000000);
+  Timer1.attachInterrupt(sendStatus);
+
+  Serial.begin(19200);
+}
+
+int readSerialData() {
+  int data = readData();
+  
+  if (data == 29000) {
+    digitalWrite(RED, HIGH);
+    digitalWrite(BLUE, LOW);
+  } else if (data == 29001) {
+    digitalWrite(RED, LOW);
+    digitalWrite(BLUE, HIGH);
+  }
+
+  return data;
 }
 
 int readData() {
   char inChar;
-  int no = 0;
+  int no = -1;
 
   while (Serial.available()) {
     inChar = (char) Serial.read();

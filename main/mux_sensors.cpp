@@ -5,6 +5,8 @@
 #define WHEEL_RAD   55/2 //mm
 #define ANG2VEL     2.0*PI/NB_TEETH*REDUCTION*WHEEL_RAD
 
+#define BATTERY_PIN A0
+
 #include "mux_sensors.h"
 #include "Wire.h"
 #include <VL53L0X.h>
@@ -33,6 +35,7 @@ void setupSensors() {
     sensor.startContinuous();
   }
 
+  pinMode(BATTERY_PIN, INPUT);
   attachInterrupt(digitalPinToInterrupt(ENCA),encoderTrigger,FALLING);
 }
 
@@ -46,6 +49,10 @@ void setupSensors() {
 
 int16_t getVelocity(){
   return velocity;
+}
+
+int16_t getBatteryLevel(){
+  return map(analogRead(BATTERY_PIN), 0, 1023, 0, 100);
 }
 
 void encoderTrigger()

@@ -1,4 +1,5 @@
-void sendData(int *sensorData, int dataSize);
+void sendStatus();
 int readData();
 int format_string();
 void setupComm();
+int readSerialData();
