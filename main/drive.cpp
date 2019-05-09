@@ -1,5 +1,6 @@
 #include "drive.h"
 #include "Arduino.h"
+
 #define MOTOR_B_ENABLE 6
 #define MOTOR_B_BWD 7
 #define MOTOR_B_FWD 8
@@ -7,17 +8,6 @@
 #define SERVO_A_FWD 10
 #define SERVO_A_ENABLE 11
 #define SERVO_POT 0
-//
-//String inputString = "";
-//char drive_string[10] = {'\0'};
-//int drive_string_pos = 0;
-//boolean stringComplete = false;
-
-//boolean should_init = true;
-
-// servo
-
-// led
 
 int ref;
 float P_CONSTANT = .55;
@@ -27,8 +17,8 @@ int schreechingThreshold = 12;
 int x_final = 0;
 int y_final = 0;
 
-int throttle = 0;
-int steer = 0;
+volatile int16_t throttlePwm = 0;
+volatile int16_t steerPwm = 0;
 
 enum {FWD, BWD} dir;
 //enum {LEFT, RIGHT} steer;
@@ -74,31 +64,10 @@ void setupDrive() {
   digitalWrite(MOTOR_B_BWD, 0);
 
   dir = FWD;
-
-  // UART
-//  inputString.reserve(200);
-
+  
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
 }
-
-//
-//int format_string() {
-//
-//  char chars[20];
-//  int i = 0;
-//  int j = 0;
-//  while (inputString.charAt(i) < '0' || inputString.charAt(i) > '9') {
-//    i++;
-//  }
-//
-//  for (int k = i; k < inputString.length(); k++) {
-//    chars[j++] = inputString.charAt(k);
-//  }
-//  chars[j] = '\0';
-//
-//  return atoi(chars);
-//}
 
 void drive(int x, int y) {
 
@@ -121,10 +90,12 @@ void power(int pwm) {
     case FWD :
       digitalWrite(motor.fwd, 1);
       digitalWrite(motor.bwd, 0);
+      throttlePwm = pwm;
       break;
     case BWD :
       digitalWrite(motor.fwd, 0);
       digitalWrite(motor.bwd, 1);
+      throttlePwm = -pwm;
       break;
   }
   analogWrite(motor.enable, pwm);
@@ -151,6 +122,7 @@ void steerAtRef (int ref) {
   digitalWrite(serv.fwd, command < 0);
   digitalWrite(serv.bwd, command > 0);
   analogWrite(serv.enable, abs(command));
+  steerPwm = command < 0? command: -command;
 }
 
 void steering(int x) {
@@ -159,4 +131,12 @@ void steering(int x) {
   } else {
     steerAtRef(map(x, 51, 101, 500, 400)); // right
   }
+}
+
+int16_t getSteerPwm(){
+  return steerPwm;
+}
+
+int16_t getThrottlePwm(){
+  return throttlePwm;
 }

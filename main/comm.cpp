@@ -8,6 +8,7 @@
 #include "Arduino.h"
 #include "mux_sensors.h"
 #include "TimerOne.h"
+#include "drive.h"
 
 String inputString = "";
 int batteryLedStatus = 0;
@@ -16,6 +17,8 @@ typedef struct {
   int16_t distanceSensorData[VL_NO];
   int16_t batteryVoltage;
   int16_t velocity;
+  int16_t motorPwm;
+  int16_t servoPwm;
 } SensorData;
 
 typedef union {
@@ -36,7 +39,8 @@ void sendStatus() {
   }
 
   sensorData.sensors.velocity = getVelocity();
-
+  sensorData.sensors.motorPwm = getThrottlePwm();
+  sensorData.sensors.servoPwm = getSteerPwm();
   // send to Serial
   Serial.write(sensorData.serializedSensor, sizeof(sensorData));
 }
