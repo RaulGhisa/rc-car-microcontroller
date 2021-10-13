@@ -73,10 +73,10 @@ void drive(int x, int y) {
 
   if (y >= 51) {
     y = y - 51;
-    dir = FWD;
+    dir = BWD;
   }
   else {
-    dir = BWD;
+    dir = FWD;
   }
 
   int pwm = map(y, 0, 50, 0, 255);

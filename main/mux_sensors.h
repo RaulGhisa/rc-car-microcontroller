@@ -1,5 +1,5 @@
 #define TCAADDR 0x70
-#define VL_NO 2
+#define VL_NO 3
 #include <stdint.h>
 
 void encoderTrigger();

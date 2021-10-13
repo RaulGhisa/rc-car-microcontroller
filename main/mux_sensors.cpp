@@ -11,32 +11,33 @@
 #include "Wire.h"
 #include <VL53L0X.h>
 
-uint8_t VL53[] = { 2, 3, 4, 5 };
+uint8_t VL53[] = {2, 4, 5 };
 volatile int16_t velocity = 0; // mm/s
 int counterEnc = micros();
 
 void tcaselect(int i) {
-	if (i > 7) return;
+  if (i > 7) return;
 
-	Wire.beginTransmission(TCAADDR);
-	Wire.write(1 << i);
-	Wire.endTransmission();
+  Wire.beginTransmission(TCAADDR);
+  Wire.write(1 << i);
+  Wire.endTransmission();
 }
 
 void setupSensors() {
-	Wire.begin();
+  Wire.begin();
 
-	for (int index = 0; index < VL_NO; index++) {
-		tcaselect(VL53[index]);
-		delay(30);
-		VL53L0X sensor;
-		sensor.init();
-		sensor.setTimeout(500);
-		sensor.startContinuous();
-	}
+  for (int index = 0; index < VL_NO; index++) {
+    tcaselect(VL53[index]);
+    delay(30);
+    VL53L0X sensor;
+    sensor.init();
+    sensor.setTimeout(500);
+    sensor.startContinuous();
+  }
 
-	pinMode(BATTERY_PIN, INPUT);
-	attachInterrupt(digitalPinToInterrupt(ENCA), encoderTrigger, FALLING);
+  pinMode(BATTERY_PIN, INPUT);
+  attachInterrupt(digitalPinToInterrupt(ENCA), encoderTrigger, FALLING);
+  Serial.println("sensors setup success");
 }
 
 //void loop() {
@@ -48,25 +49,25 @@ void setupSensors() {
 //}
 
 int16_t getVelocity() {
-	return velocity;
+  return velocity;
 }
 
 int16_t getBatteryLevel() {
-	return map(analogRead(BATTERY_PIN), 0, 1023, 0, 100);
+  return map(analogRead(BATTERY_PIN), 0, 1023, 0, 100);
 }
 
 void encoderTrigger()
 {
-	velocity = (int16_t)1000000 * ANG2VEL / (micros() - counterEnc);
-	if (digitalRead(ENCB) == LOW)
-	{
-		velocity = -velocity;
-	}
-	counterEnc = micros();
+  velocity = (int16_t)1000000 * ANG2VEL / (micros() - counterEnc);
+  if (digitalRead(ENCB) == LOW)
+  {
+    velocity = -velocity;
+  }
+  counterEnc = micros();
 }
 
 int16_t getMuxDistanceReading(int sensorIndex) {
-	tcaselect(VL53[sensorIndex]);
-	VL53L0X sensor;
-	return sensor.readRangeContinuousMillimeters();
+  tcaselect(VL53[sensorIndex]);
+  VL53L0X sensor;
+  return sensor.readRangeContinuousMillimeters();
 }

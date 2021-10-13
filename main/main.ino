@@ -5,10 +5,21 @@
 int steeringCommand;
 int tractionCommand;
 
+long currentTime;
+
 void setup() {
+
+  currentTime = millis();
+  Serial.begin(19200);
+
+  Serial.println("sensors");
   setupSensors();
-  setupDrive();
+
+  delay(1000);
   setupComm();
+
+  Serial.println("drive");
+  setupDrive();
 }
 
 void loop() {
@@ -25,14 +36,25 @@ void loop() {
   // 6. delay(50);
 
   /*
-  for (int i = 5; i < 100; i += 10) {
+    for (int i = 5; i < 100; i += 10) {
     for (int j = 0; j < 50; j++) {
       steering(i);
     }
-  } 
+    }
   */
+
+  long aux = millis();
+  if (aux - currentTime > 1000) {
+    sendStatus();
+    currentTime = aux;
+  }
+  
   int data = readSerialData();
-  if (data != 29000 && data!=29001 && data!= -1){
+  if (
+    data != 29000 && data != 29001 && // switch RED / BLUE
+    data != 28000 && data != 28001 && // switch MANUAL / AUTONOM
+    data != -1
+    ) {
     tractionCommand = data & 0x00FF;
     steeringCommand = data >> 8;
   }
