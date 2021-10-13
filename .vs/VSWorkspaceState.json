@@ -4,6 +4,6 @@
     "\\data_sender",
     "\\main"
   ],
-  "SelectedNode": "\\main\\main.ino",
+  "SelectedNode": "\\main\\comm.cpp",
   "PreviewInSolutionExplorer": false
 }
